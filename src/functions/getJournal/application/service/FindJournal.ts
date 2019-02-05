@@ -9,6 +9,7 @@ import * as moment from 'moment';
 class DateUpdater {
 
   private dateFormat = 'YYYY-MM-DDTHH:mm:ssZ';
+  private hasSkippedSunday = false;
 
   constructor(public data: ExaminerWorkSchedule) { }
 
@@ -79,6 +80,13 @@ class DateUpdater {
 
     const daysToAdd = this.caculateDiffInDays(itemDate, dateProcessing);
     newDate.add(daysToAdd, 'days');
+
+    // Skip Sunday's
+    const sunday = 0;
+    if (newDate.day() === sunday || this.hasSkippedSunday) {
+      newDate.add(1, 'day');
+      this.hasSkippedSunday = true;
+    }
     return this.createMoment(itemDate);
   }
 }
