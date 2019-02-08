@@ -4,7 +4,7 @@ provider:
   name: aws
   runtime: nodejs8.10
   environment:
-    JOURNAL_DDB_TABLE_NAME: journal
+    JOURNALS_DDB_TABLE_NAME: journals
 
 package:
   individually: true
@@ -37,7 +37,7 @@ resources:
     penaltyDocuments:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.JOURNAL_DDB_TABLE_NAME}
+        TableName: ${self:provider.environment.JOURNALS_DDB_TABLE_NAME}
         AttributeDefinitions:
           - AttributeName: staffNumber
             AttributeType: S
