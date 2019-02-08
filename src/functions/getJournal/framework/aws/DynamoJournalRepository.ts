@@ -27,7 +27,7 @@ export async function getJournal(staffNumber: string): Promise<JournalWrapper | 
 }
 
 function getJournalTableName(): string {
-  let tableName = process.env.JOURNAL_DDB_TABLE_NAME;
+  let tableName = process.env.JOURNALS_DDB_TABLE_NAME;
   if (tableName === undefined || tableName.length === 0) {
     logger.warn('No journal table name set, using the default');
     tableName = 'journal';
