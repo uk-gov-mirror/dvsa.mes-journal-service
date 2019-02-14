@@ -19,8 +19,6 @@
     "package": "./package.sh",
     "postci": "npm run bootstrap",
     "postinstall": "npm run bootstrap",
-    "prepush": "run-s security-scan lint npm test",
-    "precommit": "run-s lint:fix lint compile-no-emit",
     "security-scan": "git secrets --scan && git log -p | scanrepo",
     "start": "sls dynamodb install && sls offline start",
     "test": "npm run compile && jasmine",
@@ -58,7 +56,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-push": "run-s security-scan lint npm test",
+      "pre-push": "run-s lint npm test security-scan",
       "pre-commit": "run-s lint:fix lint compile-no-emit"
     }
   },
