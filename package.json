@@ -9,6 +9,23 @@
     "type": "git",
     "url": "git+https://github.com/dvsa/mes-journal-service.git"
   },
+  "scripts": {
+    "clean": "rimraf build artefacts",
+    "compile": "tsc",
+    "compile-no-emit": "tsc --noEmit -p .",
+    "bootstrap": "json2ts schema/schemaExaminerWorkSchedule.json > src/common/domain/Journal.d.ts",
+    "lint": "tslint --project tslint.json",
+    "lint:fix": "tslint --fix -p ./",
+    "package": "./package.sh",
+    "postci": "npm run bootstrap",
+    "postinstall": "npm run bootstrap",
+    "prepush": "npm run security-scan && npm run lint && npm test",
+    "precommit": "npm run lint:fix && npm run lint && npm run compile-no-emit",
+    "security-scan": "git secrets --scan && git log -p | scanrepo",
+    "start": "sls dynamodb install && sls offline start",
+    "test": "npm run compile && jasmine",
+    "test:integration": "npm run compile && jasmine build/spec/journal.spec.js"
+  },
   "dependencies": {
     "aws-sdk": "^2.389.0",
     "moment": "^2.23.0"
@@ -38,23 +55,10 @@
     "webpack-cli": "^3.1.2",
     "yamljs": "^0.3.0"
   },
-  "scripts": {
-    "clean": "rimraf build artefacts",
-    "compile": "tsc",
-    "bootstrap": "json2ts schema/schemaExaminerWorkSchedule.json > src/common/domain/Journal.d.ts",
-    "lint": "tslint --project tslint.json",
-    "package": "./package.sh",
-    "postci": "npm run bootstrap",
-    "postinstall": "npm run bootstrap",
-    "prepush": "npm run security-scan && npm run lint && npm test",
-    "security-scan": "git secrets --scan && git log -p | scanrepo",
-    "start": "sls dynamodb install && sls offline start",
-    "test": "npm run compile && jasmine",
-    "test:integration": "npm run compile && jasmine build/spec/journal.spec.js"
-  },
   "husky": {
     "hooks": {
-      "pre-push": "npm run security-scan && npm run lint && npm test && npm run test:integration"
+      "pre-push": "npm run security-scan && npm run lint && npm test && npm run test:integration",
+      "pre-commit": "npm run lint:fix && npm run lint && npm run compile-no-emit"
     }
   },
   "bugs": {
