@@ -4,25 +4,9 @@
       "no-unused-variable": false,
       "quotemark": [true, "single"],
       "indent": [true, "spaces", 2],
-      "max-line-length": [true, 120],
-      "rxjs-add": { "severity": "error" },
-      "rxjs-no-operator": { "severity": "error" },
-      "rxjs-no-patched": { "severity": "error" },
-      "rxjs-no-wholesale": { "severity": "error" },
-      "rxjs-no-unused-add": { "severity": "error" },
-      "rxjs-no-unsafe-switchmap": { "severity": "error" },
-      "rxjs-finnish": {
-        "options": [{
-          "functions": false,
-          "methods": false,
-          "parameters": true,
-          "properties": true,
-          "variables": true
-        }],
-        "severity": "error"
-      }
+      "max-line-length": [true, 120]
     },
     "rulesDirectory": ["node_modules/tslint-eslint-rules/dist/rules"],
-    "extends": ["tslint-config-airbnb", "rxjs-tslint-rules"]
+    "extends": "tslint-config-airbnb"
   }
   
