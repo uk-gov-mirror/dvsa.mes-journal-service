@@ -25,7 +25,9 @@
     "test:integration": "npm run compile && jasmine build/spec/journal.spec.js"
   },
   "dependencies": {
+    "@types/jwt-decode": "^2.2.1",
     "aws-sdk": "^2.389.0",
+    "jwt-decode": "^2.2.0",
     "moment": "^2.23.0"
   },
   "devDependencies": {

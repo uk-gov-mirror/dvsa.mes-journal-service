@@ -4,6 +4,7 @@ const lambdaTestUtils = require('aws-lambda-test-utils');
 import * as createResponse from '../../../../common/application/utils/createResponse';
 import { APIGatewayEvent, Context } from 'aws-lambda';
 import * as FindJournal from '../../application/service/FindJournal';
+import { tokens } from '../__mocks__/authentication-token.mock';
 
 describe('getJournal handler', () => {
   const fakeJournal: ExaminerWorkSchedule = {
@@ -20,6 +21,10 @@ describe('getJournal handler', () => {
     dummyApigwEvent = lambdaTestUtils.mockEventCreator.createAPIGatewayEvent({
       pathParameters: {
         staffNumber: '12345678',
+      },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_12345678,
       },
     });
     dummyContext = lambdaTestUtils.mockContextCreator(() => null);
@@ -70,6 +75,36 @@ describe('getJournal handler', () => {
 
       expect(resp.statusCode).toBe(400);
       expect(createResponse.default).toHaveBeenCalledWith('No staffNumber provided', 400);
+    });
+  });
+
+  describe('given there is no employeeId in the authorisation token', () => {
+    it('should indicate a bad request', async () => {
+      dummyApigwEvent.headers = {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_null,
+      };
+      createResponseSpy.and.returnValue({ statusCode: 400 });
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(400);
+      expect(createResponse.default).toHaveBeenCalledWith('Invalid authorisation token', 400);
+    });
+  });
+
+  describe('given the staff number does not match the employeeId in the authorisation token', () => {
+    it('should indicate a bad request', async () => {
+      dummyApigwEvent.headers = {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_01234567,
+      };
+      createResponseSpy.and.returnValue({ statusCode: 400 });
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(400);
+      expect(createResponse.default).toHaveBeenCalledWith('Invalid staffNumber', 400);
     });
   });
 });
