@@ -84,12 +84,12 @@ describe('getJournal handler', () => {
         'Content-Type': 'application/json',
         Authorization: tokens.employeeId_null,
       };
-      createResponseSpy.and.returnValue({ statusCode: 400 });
+      createResponseSpy.and.returnValue({ statusCode: 401 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
 
-      expect(resp.statusCode).toBe(400);
-      expect(createResponse.default).toHaveBeenCalledWith('Invalid authorisation token', 400);
+      expect(resp.statusCode).toBe(401);
+      expect(createResponse.default).toHaveBeenCalledWith('Invalid authorisation token', 401);
     });
   });
 
@@ -99,12 +99,12 @@ describe('getJournal handler', () => {
         'Content-Type': 'application/json',
         Authorization: tokens.employeeId_01234567,
       };
-      createResponseSpy.and.returnValue({ statusCode: 400 });
+      createResponseSpy.and.returnValue({ statusCode: 403 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
 
-      expect(resp.statusCode).toBe(400);
-      expect(createResponse.default).toHaveBeenCalledWith('Invalid staffNumber', 400);
+      expect(resp.statusCode).toBe(403);
+      expect(createResponse.default).toHaveBeenCalledWith('Invalid staffNumber', 403);
     });
   });
 });
