@@ -2,20 +2,10 @@
   {
     "hash": "6slots",
     "journal": {
-      "examinerName": {
-        "firstName": "Joe",
-        "lastName": "Bloggs",
-        "secondName": "Frederic",
-        "thirdName": "Englbert",
-        "title": "Mr"
+      "examiner": {
+        "staffNumber": "01234567"
       },
       "nonTestActivities": [],
-      "permTestCentre": {
-        "centreId": 54321,
-        "centreName": "Example Test Centre",
-        "costCode": "EXTC1"
-      },
-      "staffNumber": "01234567",
       "testSlots": [
         {
           "booking": {
@@ -27,6 +17,8 @@
               "extendedTest": false,
               "progressiveAccess": false,
               "specialNeeds": "Candidate has dyslexia",
+              "specialNeedsCode": "NONE",
+              "specialNeedsExtendedTest": false,
               "testCategory": "A1",
               "vehicleGearbox": "Automatic",
               "welshTest": false
@@ -119,7 +111,8 @@
             "centreName": "Example Test Centre",
             "costCode": "EXTC1"
           },
-          "vehicleSlotType": "B57mins"
+          "vehicleSlotType": "B57mins",
+          "vehicleSlotTypeCode": 7
         },
         {
           "booking": {
@@ -167,7 +160,9 @@
             "centreName": "Example Test Centre",
             "costCode": "EXTC1"
           },
-          "vehicleSlotType": "B57mins"
+          "vehicleSlotType": "B57mins",
+          "vehicleSlotTypeCode": 7
+
         },
         {
           "booking": {
@@ -217,7 +212,9 @@
             "centreName": "Example Test Centre",
             "costCode": "EXTC1"
           },
-          "vehicleSlotType": "B57mins"
+          "vehicleSlotType": "B57mins",
+          "vehicleSlotTypeCode": 7
+
         },
         {
           "booking": {
@@ -269,7 +266,9 @@
             "centreName": "Example Test Centre",
             "costCode": "EXTC1"
           },
-          "vehicleSlotType": "B57mins"
+          "vehicleSlotType": "B57mins",
+          "vehicleSlotTypeCode": 7
+
         },
         {
           "booking": {
@@ -313,7 +312,8 @@
             "centreName": "Example Test Centre",
             "costCode": "EXTC1"
           },
-          "vehicleSlotType": "B57mins"
+          "vehicleSlotType": "B57mins",
+          "vehicleSlotTypeCode": 7
         }
       ]
     },
