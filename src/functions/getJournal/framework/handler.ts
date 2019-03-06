@@ -12,12 +12,14 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   }
 
   const employeeId = getEmployeeIdFromToken(event.headers.Authorization);
-  if (employeeId === null) {
-    return createResponse('Invalid authorisation token', HttpStatus.UNAUTHORIZED);
-  }
-  if (employeeId !== staffNumber) {
-    logger.warn(`Invalid staff number (${staffNumber}) requested by employeeId ${employeeId}`);
-    return createResponse('Invalid staffNumber', HttpStatus.FORBIDDEN);
+  if (process.env.EMPLOYEE_ID_VERIFICATION_DISABLED !== 'true') {
+    if (employeeId === null) {
+      return createResponse('Invalid authorisation token', HttpStatus.UNAUTHORIZED);
+    }
+    if (employeeId !== staffNumber) {
+      logger.warn(`Invalid staff number (${staffNumber}) requested by employeeId ${employeeId}`);
+      return createResponse('Invalid staffNumber', HttpStatus.FORBIDDEN);
+    }
   }
 
   try {

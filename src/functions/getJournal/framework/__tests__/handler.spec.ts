@@ -28,6 +28,7 @@ describe('getJournal handler', () => {
       },
     });
     dummyContext = lambdaTestUtils.mockContextCreator(() => null);
+    process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = undefined;
   });
 
   describe('given the FindJournal returns a journal', () => {
@@ -105,6 +106,47 @@ describe('getJournal handler', () => {
 
       expect(resp.statusCode).toBe(403);
       expect(createResponse.default).toHaveBeenCalledWith('Invalid staffNumber', 403);
+    });
+  });
+
+  describe('given the enviroment variable is set to skip employee ID verification', () => {
+    it('should return a successful response with the journal when the correct employee ID is sent', async () => {
+      process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = 'true';
+      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      createResponseSpy.and.returnValue({ statusCode: 200 });
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(200);
+      expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
+    });
+    it('should return a successful response with the journal when no employee ID is sent', async () => {
+      process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = 'true';
+      dummyApigwEvent.headers = {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_null,
+      };
+      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      createResponseSpy.and.returnValue({ statusCode: 200 });
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(200);
+      expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
+    });
+    it('should return a successful response with the journal when a different employee ID is sent', async () => {
+      process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = 'true';
+      dummyApigwEvent.headers = {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_01234567,
+      };
+      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      createResponseSpy.and.returnValue({ statusCode: 200 });
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(200);
+      expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
     });
   });
 });
