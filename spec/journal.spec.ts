@@ -27,7 +27,8 @@ describe('integration test', () => {
       .end((err, res) => {
         if (err) throw err;
         const response: ExaminerWorkSchedule = res.body;
-        expect(response.staffNumber).toBe('01234567');
+        // @ts-ignore
+        expect(response.examiner.staffNumber).toBe('01234567');
         // @ts-ignore
         expect(response.testSlots.length).toBe(6);
         done();
