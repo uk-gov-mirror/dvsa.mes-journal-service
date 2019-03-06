@@ -3,11 +3,23 @@ import createResponse from '../../../common/application/utils/createResponse';
 import { HttpStatus } from '../../../common/application/api/HttpStatus';
 import * as logger from '../../../common/application/utils/logger';
 import { findJournal } from '../application/service/FindJournal';
+import * as jwtDecode from 'jwt-decode';
 
 export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   const staffNumber = getStaffNumber(event.pathParameters);
   if (staffNumber === null) {
     return createResponse('No staffNumber provided', HttpStatus.BAD_REQUEST);
+  }
+
+  const employeeId = getEmployeeIdFromToken(event.headers.Authorization);
+  if (process.env.EMPLOYEE_ID_VERIFICATION_DISABLED !== 'true') {
+    if (employeeId === null) {
+      return createResponse('Invalid authorisation token', HttpStatus.UNAUTHORIZED);
+    }
+    if (employeeId !== staffNumber) {
+      logger.warn(`Invalid staff number (${staffNumber}) requested by employeeId ${employeeId}`);
+      return createResponse('Invalid staffNumber', HttpStatus.FORBIDDEN);
+    }
   }
 
   try {
@@ -30,4 +42,25 @@ function getStaffNumber(pathParams: { [key: string]: string } | null) : string |
     return null;
   }
   return pathParams.staffNumber;
+}
+
+function getEmployeeIdFromToken(token: string) : string | null {
+  if (token === null) {
+    logger.warn('No authorisation token in request');
+    return null;
+  }
+
+  try {
+    const decodedToken: any = jwtDecode(token);
+    if (!decodedToken['extn.employeeId']
+          || typeof decodedToken['extn.employeeId'][0] !== 'string'
+          || decodedToken['extn.employeeId'][0].length === 0) {
+      logger.warn('No employeeId found in authorisation token');
+      return null;
+    }
+    return decodedToken['extn.employeeId'][0];
+  } catch (err) {
+    logger.error(err);
+    return null;
+  }
 }
