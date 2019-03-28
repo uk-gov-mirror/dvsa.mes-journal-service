@@ -23,6 +23,7 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   }
 
   try {
+    logger.info(`Finding journal for staff number ${staffNumber}`);
     const journal = await findJournal(staffNumber);
     if (journal === null) {
       return createResponse({}, HttpStatus.NOT_FOUND);
