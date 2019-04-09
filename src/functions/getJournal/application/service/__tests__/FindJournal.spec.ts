@@ -41,13 +41,13 @@ describe('FindJournal', () => {
     });
 
     it('should return the journal embedded in the wrapper', async () => {
-      const compressedJournalFromRepo = { journal: 'abc' };
+      const compressedJournalFromRepo = { journal: Buffer.from('abc') };
       spyOn(DynamoJournalRepository, 'getJournal')
         .and.returnValue(compressedJournalFromRepo);
 
       const result = await findJournal('00000000');
 
-      moqDecompressJournal.verify(x => x(It.isValue('abc')), Times.once());
+      moqDecompressJournal.verify(x => x(It.isValue(Buffer.from('abc'))), Times.once());
       // @ts-ignore
       expect(result.staffNumber).toBe('00000000');
     });
