@@ -35,17 +35,17 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   }
 }
 
-function getStaffNumber(pathParams: { [key: string]: string } | null) : string | null {
+function getStaffNumber(pathParams: { [key: string]: string } | null): string | null {
   if (pathParams === null
-        || typeof pathParams.staffNumber !== 'string'
-        || pathParams.staffNumber.trim().length === 0) {
+    || typeof pathParams.staffNumber !== 'string'
+    || pathParams.staffNumber.trim().length === 0) {
     logger.warn('No staffNumber path parameter found');
     return null;
   }
   return pathParams.staffNumber;
 }
 
-function getEmployeeIdFromToken(token: string) : string | null {
+function getEmployeeIdFromToken(token: string): string | null {
   if (token === null) {
     logger.warn('No authorisation token in request');
     return null;
@@ -53,15 +53,38 @@ function getEmployeeIdFromToken(token: string) : string | null {
 
   try {
     const decodedToken: any = jwtDecode(token);
-    if (!decodedToken['extn.employeeId']
-          || typeof decodedToken['extn.employeeId'][0] !== 'string'
-          || decodedToken['extn.employeeId'][0].length === 0) {
+    const employeeIdKey = process.env.EMPLOYEE_ID_EXT_KEY || '';
+    if (employeeIdKey.length === 0) {
+      logger.error('No key specified to find employee ID from JWT');
+      return null;
+    }
+
+    const employeeIdFromJwt = decodedToken[employeeIdKey];
+    if (!employeeIdFromJwt) {
       logger.warn('No employeeId found in authorisation token');
       return null;
     }
-    return decodedToken['extn.employeeId'][0];
+
+    return Array.isArray(employeeIdFromJwt) ?
+      getEmployeeIdFromArray(employeeIdFromJwt) : getEmployeeIdStringProperty(employeeIdFromJwt);
   } catch (err) {
     logger.error(err);
     return null;
   }
+}
+
+function getEmployeeIdFromArray(attributeArr: string[]): string | null {
+  if (attributeArr.length === 0) {
+    logger.warn('No employeeId found in authorisation token');
+    return null;
+  }
+  return attributeArr[0];
+}
+
+function getEmployeeIdStringProperty(employeeId: any): string | null {
+  if (typeof employeeId !== 'string' || employeeId.trim().length === 0) {
+    logger.warn('No employeeId found in authorisation token');
+    return null;
+  }
+  return employeeId;
 }

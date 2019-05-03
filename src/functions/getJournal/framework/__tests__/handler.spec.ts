@@ -29,6 +29,7 @@ describe('getJournal handler', () => {
     });
     dummyContext = lambdaTestUtils.mockContextCreator(() => null);
     process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = undefined;
+    process.env.EMPLOYEE_ID_EXT_KEY = 'extn.employeeId';
   });
 
   describe('given the FindJournal returns a journal', () => {
@@ -91,6 +92,36 @@ describe('getJournal handler', () => {
 
       expect(resp.statusCode).toBe(401);
       expect(createResponse.default).toHaveBeenCalledWith('Invalid authorisation token', 401);
+    });
+  });
+
+  describe('obtaining employee ID from token with array or non-array extension attributes', () => {
+    it('should get the employee ID from when the property is an array', async () => {
+      dummyApigwEvent.headers = {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_12345678,
+      };
+      createResponseSpy.and.returnValue({ statusCode: 200 });
+      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(200);
+      expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
+    });
+    it('should get the employee ID from when the property is a string', async () => {
+      dummyApigwEvent.headers = {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_notArray,
+      };
+      process.env.EMPLOYEE_ID_EXT_KEY = 'employeeid';
+      createResponseSpy.and.returnValue({ statusCode: 200 });
+      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(200);
+      expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
     });
   });
 
