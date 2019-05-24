@@ -5,6 +5,8 @@ import * as createResponse from '../../../../common/application/utils/createResp
 import { APIGatewayEvent, Context } from 'aws-lambda';
 import * as FindJournal from '../../application/service/FindJournal';
 import { tokens } from '../__mocks__/authentication-token.mock';
+import { Mock, It, Times } from 'typemoq';
+import { JournalNotFoundError } from '../../domain/errors/journal-not-found-error';
 
 describe('getJournal handler', () => {
   const fakeJournal: ExaminerWorkSchedule = {
@@ -16,7 +18,11 @@ describe('getJournal handler', () => {
   let dummyContext: Context;
   let createResponseSpy: jasmine.Spy;
 
+  const moqFindJournal = Mock.ofInstance(FindJournal.findJournal);
+
   beforeEach(() => {
+    moqFindJournal.reset();
+
     createResponseSpy = spyOn(createResponse, 'default');
     dummyApigwEvent = lambdaTestUtils.mockEventCreator.createAPIGatewayEvent({
       pathParameters: {
@@ -30,11 +36,12 @@ describe('getJournal handler', () => {
     dummyContext = lambdaTestUtils.mockContextCreator(() => null);
     process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = undefined;
     process.env.EMPLOYEE_ID_EXT_KEY = 'extn.employeeId';
+    spyOn(FindJournal, 'findJournal').and.callFake(moqFindJournal.object);
   });
 
   describe('given the FindJournal returns a journal', () => {
     it('should return a successful response with the journal', async () => {
-      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
       createResponseSpy.and.returnValue({ statusCode: 200 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
@@ -44,9 +51,9 @@ describe('getJournal handler', () => {
     });
   });
 
-  describe('given the FindJournal returns null', () => {
-    it('should return HTTP 404', async () => {
-      spyOn(FindJournal, 'findJournal').and.returnValue(null);
+  describe('given FindJournal throws a JournalNotFound error', () => {
+    it('should return HTTP 404 NOT_FOUND', async () => {
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).throws(new JournalNotFoundError());
       createResponseSpy.and.returnValue({ statusCode: 404 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
@@ -56,9 +63,21 @@ describe('getJournal handler', () => {
     });
   });
 
+  describe('given FindJournal returns null', () => {
+    it('should return HTTP 304 NOT_MODIFIED', async () => {
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(null));
+      createResponseSpy.and.returnValue({ statusCode: 304 });
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(304);
+      expect(createResponse.default).toHaveBeenCalledWith({}, 304);
+    });
+  });
+
   describe('given the FindJournal throws', () => {
     it('should respond with internal server error', async () => {
-      spyOn(FindJournal, 'findJournal').and.throwError('Unable to retrieve journal');
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).throws(new Error('Unable to retrieve journal'));
       createResponseSpy.and.returnValue({ statusCode: 500 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
@@ -102,7 +121,7 @@ describe('getJournal handler', () => {
         Authorization: tokens.employeeId_12345678,
       };
       createResponseSpy.and.returnValue({ statusCode: 200 });
-      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
 
       const resp = await handler(dummyApigwEvent, dummyContext);
 
@@ -116,7 +135,7 @@ describe('getJournal handler', () => {
       };
       process.env.EMPLOYEE_ID_EXT_KEY = 'employeeid';
       createResponseSpy.and.returnValue({ statusCode: 200 });
-      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
 
       const resp = await handler(dummyApigwEvent, dummyContext);
 
@@ -143,7 +162,7 @@ describe('getJournal handler', () => {
   describe('given the enviroment variable is set to skip employee ID verification', () => {
     it('should return a successful response with the journal when the correct employee ID is sent', async () => {
       process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = 'true';
-      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
       createResponseSpy.and.returnValue({ statusCode: 200 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
@@ -157,7 +176,7 @@ describe('getJournal handler', () => {
         'Content-Type': 'application/json',
         Authorization: tokens.employeeId_null,
       };
-      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
       createResponseSpy.and.returnValue({ statusCode: 200 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
@@ -171,13 +190,48 @@ describe('getJournal handler', () => {
         'Content-Type': 'application/json',
         Authorization: tokens.employeeId_01234567,
       };
-      spyOn(FindJournal, 'findJournal').and.returnValue(fakeJournal);
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
       createResponseSpy.and.returnValue({ statusCode: 200 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
 
       expect(resp.statusCode).toBe(200);
       expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
+    });
+  });
+
+  describe('accepting If-Modified-Since header', () => {
+    it('should parse a valid If-Modified-Since and pass it to findJournal as a timestamp', async () => {
+      process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = 'true';
+      dummyApigwEvent.headers = {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_01234567,
+        'If-Modified-Since': 'Thu, 23 May 2019 15:09:17 GMT',
+      };
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
+      createResponseSpy.and.returnValue({ statusCode: 200 });
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(200);
+      expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
+      moqFindJournal.verify(x => x(It.isValue('12345678'), It.isValue(1558624157000)), Times.once());
+    });
+    it('should not error on a non-parsable If-Modified-Since header and pass instead of a timestamp', async () => {
+      process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = 'true';
+      dummyApigwEvent.headers = {
+        'Content-Type': 'application/json',
+        Authorization: tokens.employeeId_01234567,
+        'If-Modified-Since': 'nonesense',
+      };
+      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
+      createResponseSpy.and.returnValue({ statusCode: 200 });
+
+      const resp = await handler(dummyApigwEvent, dummyContext);
+
+      expect(resp.statusCode).toBe(200);
+      expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
+      moqFindJournal.verify(x => x(It.isValue('12345678'), It.isValue(null)), Times.once());
     });
   });
 });

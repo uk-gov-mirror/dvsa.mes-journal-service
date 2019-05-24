@@ -4,6 +4,7 @@ import { HttpStatus } from '../../../common/application/api/HttpStatus';
 import * as logger from '../../../common/application/utils/logger';
 import { findJournal } from '../application/service/FindJournal';
 import * as jwtDecode from 'jwt-decode';
+import { JournalNotFoundError } from '../domain/errors/journal-not-found-error';
 
 export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   const staffNumber = getStaffNumber(event.pathParameters);
@@ -24,12 +25,15 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
 
   try {
     logger.info(`Finding journal for staff number ${staffNumber}`);
-    const journal = await findJournal(staffNumber);
+    const journal = await findJournal(staffNumber, getIfModifiedSinceHeaderAsTimestamp(event.headers));
     if (journal === null) {
-      return createResponse({}, HttpStatus.NOT_FOUND);
+      return createResponse({}, HttpStatus.NOT_MODIFIED);
     }
     return createResponse(journal);
   } catch (err) {
+    if (err instanceof JournalNotFoundError) {
+      return createResponse({}, HttpStatus.NOT_FOUND);
+    }
     logger.error(err);
     return createResponse('Unable to retrieve journal', HttpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -88,3 +92,9 @@ function getEmployeeIdStringProperty(employeeId: any): string | null {
   }
   return employeeId;
 }
+
+const getIfModifiedSinceHeaderAsTimestamp = (headers: { [headerName: string]: string }): number | null => {
+  const ifModfiedSinceHeader = headers['If-Modified-Since'];
+  const parsedIfModifiedSinceHeader = Date.parse(ifModfiedSinceHeader);
+  return Number.isNaN(parsedIfModifiedSinceHeader) ? null : parsedIfModifiedSinceHeader;
+};
