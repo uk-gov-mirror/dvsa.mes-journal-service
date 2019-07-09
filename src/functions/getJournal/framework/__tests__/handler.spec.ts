@@ -33,9 +33,9 @@ describe('getJournal handler', () => {
         Authorization: tokens.employeeId_12345678,
       },
     });
+    dummyApigwEvent.requestContext.authorizer = { staffNumber: '12345678' };
     dummyContext = lambdaTestUtils.mockContextCreator(() => null);
     process.env.EMPLOYEE_ID_VERIFICATION_DISABLED = undefined;
-    process.env.EMPLOYEE_ID_EXT_KEY = 'extn.employeeId';
     spyOn(FindJournal, 'findJournal').and.callFake(moqFindJournal.object);
   });
 
@@ -99,27 +99,12 @@ describe('getJournal handler', () => {
     });
   });
 
-  describe('given there is no employeeId in the authorisation token', () => {
-    it('should indicate a bad request', async () => {
-      dummyApigwEvent.headers = {
-        'Content-Type': 'application/json',
-        Authorization: tokens.employeeId_null,
+  describe('obtaining employee ID from request context', () => {
+    it('should obtain a the employee ID from the request context, not the JWT', async () => {
+      dummyApigwEvent.requestContext.authorizer = {
+        staffNumber: '999999',
       };
-      createResponseSpy.and.returnValue({ statusCode: 401 });
-
-      const resp = await handler(dummyApigwEvent, dummyContext);
-
-      expect(resp.statusCode).toBe(401);
-      expect(createResponse.default).toHaveBeenCalledWith('Invalid authorisation token', 401);
-    });
-  });
-
-  describe('obtaining employee ID from token with array or non-array extension attributes', () => {
-    it('should get the employee ID from when the property is an array', async () => {
-      dummyApigwEvent.headers = {
-        'Content-Type': 'application/json',
-        Authorization: tokens.employeeId_12345678,
-      };
+      dummyApigwEvent.pathParameters = { staffNumber: '999999' };
       createResponseSpy.and.returnValue({ statusCode: 200 });
       moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
 
@@ -127,20 +112,22 @@ describe('getJournal handler', () => {
 
       expect(resp.statusCode).toBe(200);
       expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
+      moqFindJournal.verify(x => x(It.isValue('999999'), It.isAny()), Times.once());
     });
-    it('should get the employee ID from when the property is a string', async () => {
-      dummyApigwEvent.headers = {
-        'Content-Type': 'application/json',
-        Authorization: tokens.employeeId_notArray,
-      };
-      process.env.EMPLOYEE_ID_EXT_KEY = 'employeeid';
-      createResponseSpy.and.returnValue({ statusCode: 200 });
-      moqFindJournal.setup(x => x(It.isAny(), It.isAny())).returns(() => Promise.resolve(fakeJournal));
+    describe('given there is no employeeId in the request context', () => {
+      it('should indicate a bad request', async () => {
+        dummyApigwEvent.headers = {
+          'Content-Type': 'application/json',
+          Authorization: tokens.employeeId_12345678,
+        };
+        dummyApigwEvent.requestContext.authorizer = null;
+        createResponseSpy.and.returnValue({ statusCode: 401 });
 
-      const resp = await handler(dummyApigwEvent, dummyContext);
+        const resp = await handler(dummyApigwEvent, dummyContext);
 
-      expect(resp.statusCode).toBe(200);
-      expect(createResponse.default).toHaveBeenCalledWith(fakeJournal);
+        expect(resp.statusCode).toBe(401);
+        expect(createResponse.default).toHaveBeenCalledWith('No staff number found in request context', 401);
+      });
     });
   });
 
@@ -150,6 +137,7 @@ describe('getJournal handler', () => {
         'Content-Type': 'application/json',
         Authorization: tokens.employeeId_01234567,
       };
+      dummyApigwEvent.requestContext.authorizer = { staffNumber: '999999' };
       createResponseSpy.and.returnValue({ statusCode: 403 });
 
       const resp = await handler(dummyApigwEvent, dummyContext);
