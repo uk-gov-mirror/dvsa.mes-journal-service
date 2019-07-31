@@ -16,6 +16,12 @@ functions:
       - http:
           path: 'journals/{staffNumber}/personal'
           method: get
+  searchBooking:
+    handler: src/functions/searchBooking/framework/handler.handler
+    events:
+      - http:
+          path: 'journals/{staffNumber}/search'
+          method: get
 
 custom:
   dynamodb:
