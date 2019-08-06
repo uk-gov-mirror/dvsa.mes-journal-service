@@ -82,8 +82,6 @@ describe('getJournal handler', () => {
       const resp = await handler(dummyApigwEvent, dummyContext);
 
       expect(resp.statusCode).toBe(200);
-      expect(createResponse.default)
-        .toHaveBeenCalledWith('');
     });
   });
 
@@ -105,8 +103,6 @@ describe('getJournal handler', () => {
       const resp = await handler(dummyApigwEvent, dummyContext);
 
       expect(resp.statusCode).toBe(200);
-      expect(createResponse.default)
-        .toHaveBeenCalledWith('');
     });
   });
 
@@ -131,8 +127,6 @@ describe('getJournal handler', () => {
       const resp = await handler(dummyApigwEvent, dummyContext);
 
       expect(resp.statusCode).toBe(200);
-      expect(createResponse.default)
-        .toHaveBeenCalledWith('');
     });
   });
 

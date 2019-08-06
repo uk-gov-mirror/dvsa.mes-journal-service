@@ -54,11 +54,11 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   const journal: ExaminerWorkSchedule | null = await findJournal(staffNumber, null);
 
   if (!journal) {
-    return createResponse('');
+    return createResponse(200);
   }
 
   if (!journal.testSlots || journal.testSlots.length === 0) {
-    return createResponse('');
+    return createResponse(200);
   }
 
   const testSlots = journal.testSlots
@@ -85,7 +85,7 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
     .filter(testSlot => testSlot);
 
   if (testSlots.length === 0) {
-    return createResponse('');
+    return createResponse(200);
   }
 
   if (testSlots.length > 1) {
