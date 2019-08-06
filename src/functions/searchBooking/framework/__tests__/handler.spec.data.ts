@@ -335,4 +335,3 @@ export const findJournalResult: ExaminerWorkSchedule = {
     },
   ],
 };
-
