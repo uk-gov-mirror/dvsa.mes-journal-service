@@ -54,11 +54,11 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   const journal: ExaminerWorkSchedule | null = await findJournal(staffNumber, null);
 
   if (!journal) {
-    return createResponse('No journal found for supplied staff number', HttpStatus.BAD_REQUEST);
+    return createResponse('');
   }
 
   if (!journal.testSlots || journal.testSlots.length === 0) {
-    return createResponse('Journal found but no test slots available', HttpStatus.BAD_REQUEST);
+    return createResponse('');
   }
 
   const testSlots = journal.testSlots
@@ -85,7 +85,7 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
     .filter(testSlot => testSlot);
 
   if (testSlots.length === 0) {
-    return createResponse('No test slots found that match the application reference provided', HttpStatus.BAD_REQUEST);
+    return createResponse('');
   }
 
   if (testSlots.length > 1) {

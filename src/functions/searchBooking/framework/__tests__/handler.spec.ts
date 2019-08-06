@@ -78,12 +78,12 @@ describe('getJournal handler', () => {
 
       moqFindJournal
         .setup(x => x(It.isValue(staffNumberParameter), It.isAny())).returns(() => Promise.resolve(findJournalResult));
-      createResponseSpy.and.returnValue({ statusCode: 400 });
+      createResponseSpy.and.returnValue({ statusCode: 200 });
       const resp = await handler(dummyApigwEvent, dummyContext);
 
-      expect(resp.statusCode).toBe(400);
+      expect(resp.statusCode).toBe(200);
       expect(createResponse.default)
-        .toHaveBeenCalledWith('No test slots found that match the application reference provided', 400);
+        .toHaveBeenCalledWith('');
     });
   });
 
@@ -101,12 +101,12 @@ describe('getJournal handler', () => {
 
       moqFindJournal
         .setup(x => x(It.isValue(correctStaffNumber), It.isAny())).returns(() => Promise.resolve(findJournalResult));
-      createResponseSpy.and.returnValue({ statusCode: 400 });
+      createResponseSpy.and.returnValue({ statusCode: 200 });
       const resp = await handler(dummyApigwEvent, dummyContext);
 
-      expect(resp.statusCode).toBe(400);
+      expect(resp.statusCode).toBe(200);
       expect(createResponse.default)
-        .toHaveBeenCalledWith('No journal found for supplied staff number', 400);
+        .toHaveBeenCalledWith('');
     });
   });
 
@@ -127,12 +127,12 @@ describe('getJournal handler', () => {
 
       moqFindJournal
         .setup(x => x(It.isValue(staffNumberParameter), It.isAny())).returns(() => Promise.resolve(noTestSlotJournal));
-      createResponseSpy.and.returnValue({ statusCode: 400 });
+      createResponseSpy.and.returnValue({ statusCode: 200 });
       const resp = await handler(dummyApigwEvent, dummyContext);
 
-      expect(resp.statusCode).toBe(400);
+      expect(resp.statusCode).toBe(200);
       expect(createResponse.default)
-        .toHaveBeenCalledWith('Journal found but no test slots available', 400);
+        .toHaveBeenCalledWith('');
     });
   });
 
