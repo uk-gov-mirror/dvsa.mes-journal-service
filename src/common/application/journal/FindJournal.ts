@@ -1,10 +1,10 @@
-import { getJournal } from '../../framework/aws/DynamoJournalRepository';
 import { ExaminerWorkSchedule } from '@dvsa/mes-journal-schema/Journal';
-import { decompressJournal } from './journal-decompressor';
-import * as logger from '../../../../common/application/utils/logger';
+import { decompressJournal } from '../service/journal-decompressor';
+import * as logger from '../utils/logger';
+import { JournalRecord } from '../../domain/JournalRecord';
 import { JournalNotFoundError } from '../../domain/errors/journal-not-found-error';
 import { JournalDecompressionError } from '../../domain/errors/journal-decompression-error';
-import { JournalRecord } from '../../domain/JournalRecord';
+import { getJournal } from '../../framework/aws/DynamoJournalRepository';
 
 /**
  * Finds a journal with a specified staffNumber.

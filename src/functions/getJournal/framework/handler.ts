@@ -2,8 +2,8 @@ import { APIGatewayProxyEvent, Context, APIGatewayEventRequestContext } from 'aw
 import createResponse from '../../../common/application/utils/createResponse';
 import { HttpStatus } from '../../../common/application/api/HttpStatus';
 import * as logger from '../../../common/application/utils/logger';
-import { findJournal } from '../application/service/FindJournal';
-import { JournalNotFoundError } from '../domain/errors/journal-not-found-error';
+import { findJournal } from '../../../common/application/journal/FindJournal';
+import { JournalNotFoundError } from '../../../common/domain/errors/journal-not-found-error';
 
 export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   const staffNumber = getStaffNumber(event.pathParameters);
