@@ -7,6 +7,7 @@ import { formatApplicationReference } from '@dvsa/mes-microservice-common/domain
 import { ApplicationReference } from '@dvsa/mes-test-schema/categories/B';
 import { gzipSync } from 'zlib';
 import * as joi from '@hapi/joi';
+import { get } from 'lodash';
 
 export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   if (!event.queryStringParameters) {
@@ -26,7 +27,7 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   const staffNumber = event.pathParameters['staffNumber'];
 
   const parametersSchema = joi.object().keys({
-    staffNumberValidator: joi.string().alphanum().optional(),
+    staffNumberValidator: joi.number().max(100000000).optional(),
     appRefValidator: joi.number().max(1000000000000).optional(),
   });
 
@@ -50,42 +51,46 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   };
 
   const parameterAppRef: number = formatApplicationReference(appRef);
+  let journal: ExaminerWorkSchedule | null;
 
-  const journal: ExaminerWorkSchedule | null = await findJournal(staffNumber, null);
+  try {
+    journal = await findJournal(staffNumber, null);
+  } catch (exception) {
+    console.log(`Errored on getting journal for ${staffNumber}`);
+    return createResponse('Unable to get journal, please check the staff number', HttpStatus.INTERNAL_SERVER_ERROR);
+  }
 
   if (!journal) {
-    return createResponse(200);
+    return createResponse(404);
   }
 
   if (!journal.testSlots || journal.testSlots.length === 0) {
-    return createResponse(200);
+    return createResponse(404);
   }
 
   const testSlots = journal.testSlots
     .map((testSlot) => {
-      if (testSlot.booking &&
-        testSlot.booking.application &&
-        testSlot.booking.application.applicationId &&
-        testSlot.booking.application.checkDigit &&
-        testSlot.booking.application.bookingSequence
-      ) {
+      if (get(testSlot, 'booking.application', null)) {
+        console.log('here');
+        const application = get(testSlot, 'booking.application', null);
+        console.log(`application ${application}`);
         const currentAppRef: ApplicationReference = {
-          applicationId: testSlot.booking.application.applicationId,
-          checkDigit: testSlot.booking.application.checkDigit,
-          bookingSequence: testSlot.booking.application.bookingSequence,
+          applicationId: application.applicationId,
+          checkDigit: application.checkDigit,
+          bookingSequence: application.bookingSequence,
         };
 
         const formattedSlotAppRef = formatApplicationReference(currentAppRef);
+        console.log(`formatted slot ${formattedSlotAppRef}`);
         if (parameterAppRef === formattedSlotAppRef) {
           return testSlot;
         }
-
       }
     })
     .filter(testSlot => testSlot);
 
   if (testSlots.length === 0) {
-    return createResponse(200);
+    return createResponse(404);
   }
 
   if (testSlots.length > 1) {
