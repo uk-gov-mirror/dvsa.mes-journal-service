@@ -1,6 +1,6 @@
 import * as DynamoJournalRepository from '../../../framework/aws/DynamoJournalRepository';
 import { findJournal } from '../FindJournal';
-import * as journalDecompressor from '../journal-decompressor';
+import * as journalDecompressor from '../../service/journal-decompressor';
 import { Mock, It, Times } from 'typemoq';
 import { ExaminerWorkSchedule } from '@dvsa/mes-journal-schema/Journal';
 import { JournalNotFoundError } from '../../../domain/errors/journal-not-found-error';

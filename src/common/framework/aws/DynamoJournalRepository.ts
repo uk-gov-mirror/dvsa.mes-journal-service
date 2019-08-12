@@ -1,5 +1,5 @@
 import { DynamoDB } from 'aws-sdk';
-import * as logger from '../../../../common/application/utils/logger';
+import * as logger from '../../../common/application/utils/logger';
 import { JournalRecord } from '../../domain/JournalRecord';
 
 const createDynamoClient = () => {

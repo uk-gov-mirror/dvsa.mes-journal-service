@@ -3,10 +3,10 @@ import { handler } from '../handler';
 const lambdaTestUtils = require('aws-lambda-test-utils');
 import * as createResponse from '../../../../common/application/utils/createResponse';
 import { APIGatewayEvent, Context } from 'aws-lambda';
-import * as FindJournal from '../../application/service/FindJournal';
+import * as FindJournal from '../../../../common/application/journal/FindJournal';
 import { tokens } from '../__mocks__/authentication-token.mock';
 import { Mock, It, Times } from 'typemoq';
-import { JournalNotFoundError } from '../../domain/errors/journal-not-found-error';
+import { JournalNotFoundError } from '../../../../common/domain/errors/journal-not-found-error';
 
 describe('getJournal handler', () => {
   const fakeJournal: ExaminerWorkSchedule = {
