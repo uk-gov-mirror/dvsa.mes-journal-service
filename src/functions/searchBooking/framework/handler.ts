@@ -71,9 +71,7 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   const testSlots = journal.testSlots
     .map((testSlot) => {
       if (get(testSlot, 'booking.application', null)) {
-        console.log('here');
         const application = get(testSlot, 'booking.application', null);
-        console.log(`application ${application}`);
         const currentAppRef: ApplicationReference = {
           applicationId: application.applicationId,
           checkDigit: application.checkDigit,
@@ -81,7 +79,6 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
         };
 
         const formattedSlotAppRef = formatApplicationReference(currentAppRef);
-        console.log(`formatted slot ${formattedSlotAppRef}`);
         if (parameterAppRef === formattedSlotAppRef) {
           return testSlot;
         }
