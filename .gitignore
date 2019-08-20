@@ -15,6 +15,7 @@ npm-debug.log
 *.zip
 dist
 coverage
+.env
 artefacts
 .dynamodb/
 .serverless/
