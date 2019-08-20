@@ -18,7 +18,6 @@ export async function getJournal(staffNumber: string): Promise<JournalRecord | n
       staffNumber,
     },
   }).promise();
-
   if (journalGetResult.Item === undefined) {
     return null;
   }
