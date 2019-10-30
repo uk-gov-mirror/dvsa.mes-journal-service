@@ -23,9 +23,10 @@
     "test:int": "npm run compile && jasmine build/spec/journal.spec.js"
   },
   "dependencies": {
+    "@hapi/joi": "^15.0.3",
     "aws-sdk": "^2.389.0",
-    "moment": "^2.23.0",
-    "@hapi/joi": "^15.0.3"
+    "lodash": "4.17.13",
+    "moment": "^2.23.0"
   },
   "devDependencies": {
     "@dvsa/mes-journal-schema": "1.1.0",
