@@ -1,4 +1,4 @@
-import { ExaminerWorkSchedule } from '@dvsa/mes-journal-schema/Journal';
+import { ExaminerWorkSchedule } from '@dvsa/mes-journal-schema';
 import { decompressJournal } from '../service/journal-decompressor';
 import * as logger from '../utils/logger';
 import { JournalRecord } from '../../domain/JournalRecord';
