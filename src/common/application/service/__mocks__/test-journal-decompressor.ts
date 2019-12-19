@@ -1,4 +1,4 @@
-import { VehicleGearbox, Initiator } from '@dvsa/mes-journal-schema/Journal';
+import { VehicleGearbox, Initiator } from '@dvsa/mes-journal-schema';
 
 export default {
   journal: {
