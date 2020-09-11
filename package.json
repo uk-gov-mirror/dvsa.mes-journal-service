@@ -1,13 +1,13 @@
 {
-  "name": "mes-journal-service",
+  "name": "mes-delegated-booking-service",
   "version": "0.1.0",
   "author": "DVSA",
   "license": "MIT",
-  "description": "A suite of Lambda functions for CRUD of driving test examiner journal entries",
-  "homepage": "https://github.com/dvsa/mes-journal-service#README.md",
+  "description": "A suite of Lambda functions for CRUD of driving test delegated booking entries",
+  "homepage": "https://github.com/dvsa/mes-delegated-booking-service#README.md",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dvsa/mes-journal-service.git"
+    "url": "git+https://github.com/dvsa/mes-delegated-booking.git"
   },
   "scripts": {
     "clean": "rimraf build artefacts",
@@ -19,8 +19,7 @@
     "security-scan": "git secrets --scan && git log -p | scanrepo",
     "start": "sls dynamodb install && sls offline start",
     "test": "npm run compile && jasmine",
-    "test:jasmine-coverage": "nyc npm run test",
-    "test:int": "npm run compile && jasmine build/spec/journal.spec.js"
+    "test:jasmine-coverage": "nyc npm run test"
   },
   "dependencies": {
     "@hapi/joi": "^15.0.3",
@@ -88,6 +87,6 @@
     }
   },
   "bugs": {
-    "url": "https://github.com/dvsa/mes-journal-service/issues"
+    "url": "https://github.com/dvsa/mes-delegated-booking/issues"
   }
 }

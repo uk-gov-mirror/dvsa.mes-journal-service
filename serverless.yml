@@ -1,28 +1,21 @@
-service: mes-journal-service
+service: mes-delegated-bookings-service
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10
   environment:
-    JOURNALS_DDB_TABLE_NAME: journals
+    DELEGATED_BOOKING_DDB_TABLE_NAME: delegated-booking
 
 package:
   individually: true
 
 functions:
-  getJournal:
-    handler: src/functions/getJournal/framework/handler.handler
+  getDelegatedBooking:
+    handler: src/functions/getDelegatedBooking/framework/handler.handler
     events:
       - http:
-          path: 'journals/{staffNumber}/personal'
+          path: 'delegated-booking/{applicationReference}'
           method: get
-  searchBooking:
-    handler: src/functions/searchBooking/framework/handler.handler
-    events:
-      - http:
-          path: 'journals/{staffNumber}/search'
-          method: get
-
 custom:
   dynamodb:
     start:
@@ -33,7 +26,7 @@ custom:
     seed:
       test:
         sources:
-          - table: journals
+          - table: delegated-booking
             sources: [./test-data/dynamo-seed-journal.json]
   webpack:
     webpackConfig: 'webpack-sls-offline.config.js'
@@ -43,12 +36,12 @@ resources:
     penaltyDocuments:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.JOURNALS_DDB_TABLE_NAME}
+        TableName: ${self:provider.environment.DELEGATED_BOOKING_DDB_TABLE_NAME}
         AttributeDefinitions:
-          - AttributeName: staffNumber
-            AttributeType: S
+          - AttributeName: applicationReference
+            AttributeType: N
         KeySchema:
-          - AttributeName: staffNumber
+          - AttributeName: applicationReference
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 5
