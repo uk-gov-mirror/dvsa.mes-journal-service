@@ -35,3 +35,21 @@ export async function findJournal(
 const journalNotModifiedSince = (journalRecord: JournalRecord, modifiedSinceTimestamp: number | null): boolean => {
   return !!modifiedSinceTimestamp && journalRecord.lastUpdatedAt <= modifiedSinceTimestamp;
 };
+
+export async function findJournalWithResponse(
+  staffNumber: string,
+): Promise<ExaminerWorkSchedule | { error: string; }> {
+  const journalRecord = await getJournal(staffNumber);
+  if (!journalRecord) {
+    // return journal not found error instead of throwing which would stop execution
+    return { error: 'Journal not found' };
+  }
+
+  try {
+    return decompressJournal(journalRecord.journal);
+  } catch (error) {
+    logger.error(error);
+    // return journal decompression error instead of throwing which would stop execution
+    return { error: 'Journal decompression error' };
+  }
+}

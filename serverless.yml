@@ -5,6 +5,7 @@ provider:
   runtime: nodejs8.10
   environment:
     JOURNALS_DDB_TABLE_NAME: journals
+    TEST_CENTRE_DDB_TABLE_NAME: test-centres
 
 package:
   individually: true
@@ -22,9 +23,18 @@ functions:
       - http:
           path: 'journals/{staffNumber}/search'
           method: get
+  getTestCentreJournal:
+    handler: src/functions/getTestCentreJournal/framework/handler.handler
+    events:
+      - http:
+          path: 'journals/testcentre'
+          method: get
 
 custom:
   dynamodb:
+    stages:
+      - test
+      - dev
     start:
       port: 8000
       inMemory: true
@@ -35,15 +45,30 @@ custom:
         sources:
           - table: journals
             sources: [./test-data/dynamo-seed-journal.json]
+          - table: test-centres
+            sources: [./test-data/dynamo-seed-test-centre-journal.json]
   webpack:
     webpackConfig: 'webpack-sls-offline.config.js'
 
 resources:
   Resources:
-    penaltyDocuments:
+    journals:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:provider.environment.JOURNALS_DDB_TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: staffNumber
+            AttributeType: S
+        KeySchema:
+          - AttributeName: staffNumber
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    test-centres:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${env:TEST_CENTRE_DDB_TABLE_NAME, 'test-centres'}
         AttributeDefinitions:
           - AttributeName: staffNumber
             AttributeType: S
