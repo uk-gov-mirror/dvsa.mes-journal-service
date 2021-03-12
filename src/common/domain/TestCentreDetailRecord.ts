@@ -7,8 +7,19 @@ export type Examiner = {
   error?: string;
 };
 
+export type TestCentre = {
+  id: number;
+  name: string;
+};
+
 export interface TestCentreDetail {
   staffNumber: string;
   examiners: Examiner[];
   testCentreIDs: number[];
+}
+
+export interface TestCentreDetailResponse {
+  staffNumber: string;
+  examiners: Examiner[];
+  testCentres: TestCentre[];
 }

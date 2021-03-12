@@ -1,24 +1,32 @@
-import { get } from 'lodash';
+import { get, uniqBy } from 'lodash';
 import * as moment from 'moment';
 import { AdvanceTestSlot, Deployment, ExaminerWorkSchedule, NonTestActivity, TestSlot } from '@dvsa/mes-journal-schema';
-import { Examiner, TestCentreDetail } from '../../../../common/domain/TestCentreDetailRecord';
+import {
+  Examiner,
+  TestCentre,
+  TestCentreDetail,
+  TestCentreDetailResponse,
+} from '../../../../common/domain/TestCentreDetailRecord';
 import { ExaminerWorkScheduleOrEmpty } from '../../framework/handler';
+
+let testCentres: TestCentre[] = [];
 
 export const constructResponseArray = (
   testCentreDetail: TestCentreDetail,
   journals: ExaminerWorkScheduleOrEmpty[],
-): TestCentreDetail => {
+): TestCentreDetailResponse => {
+  // empty testCentres
+  testCentres = [];
 
   return {
-    ...testCentreDetail,
+    staffNumber: testCentreDetail.staffNumber,
     examiners: testCentreDetail.examiners.map((examiner: Examiner, index: number) => ({
       ...examiner,
       journal: assignJournalToStaff(testCentreDetail, examiner, journals),
-      // returning undefined when no error so it removes the key, but can change to null to keep a static
-      // data structure
-      error: ('error' in journals[index]) ? (journals[index] as { error: string; }).error : undefined,
+      error: deriveError(journals, index),
     })),
-  } as TestCentreDetail;
+    testCentres: uniqBy(testCentres, 'id'), // make test centre list distinct by id
+  };
 };
 
 const assignJournalToStaff = (
@@ -61,7 +69,8 @@ const filterByTestCentreAndDate = <T>(testCentreDetail: TestCentreDetail, info: 
     return (
       section.testCentre &&
       isAnyOf(section.testCentre.centreId, testCentreDetail.testCentreIDs) &&
-      inNext2Days(section)
+      inNext2Days(section) &&
+      testCentres.push({ name: section.testCentre.centreName, id: section.testCentre.centreId } as TestCentre)
     );
   });
 };
@@ -73,4 +82,9 @@ const inNext2Days = <T>(section: T): boolean => {
   const tomorrow: boolean = moment(slotDate).isSame(moment().add(1, 'day'), 'day');
 
   return today || tomorrow;
+};
+
+const deriveError = (journals: ExaminerWorkScheduleOrEmpty[], index: number): string | undefined => {
+  // returning undefined when no error so it removes the key
+  return ('error' in journals[index]) ? (journals[index] as { error: string; }).error : undefined;
 };

@@ -5,7 +5,7 @@ import createResponse from '../../../common/application/utils/createResponse';
 import { HttpStatus } from '../../../common/application/api/HttpStatus';
 import * as logger from '../../../common/application/utils/logger';
 import { findTestCentreDetail } from '../../../common/application/test-centre/FindTestCentre';
-import { Examiner, TestCentreDetail } from '../../../common/domain/TestCentreDetailRecord';
+import { Examiner, TestCentreDetail, TestCentreDetailResponse } from '../../../common/domain/TestCentreDetailRecord';
 import { findJournalWithResponse } from '../../../common/application/journal/FindJournal';
 import { TestCentreNotFoundError } from '../../../common/domain/errors/test-centre-not-found-error';
 import { getEmployeeIdFromRequestContext } from '../../../common/application/journal/employee-id-from-authorizer';
@@ -40,7 +40,7 @@ export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
 
     // last step is to merge the journals data with the testCentre object to assign journals to each examiner and
     // to filter by testCentreID
-    const testCentreDetail: TestCentreDetail = constructResponseArray(testCentre, journals);
+    const testCentreDetail: TestCentreDetailResponse = constructResponseArray(testCentre, journals);
     return createResponse(testCentreDetail);
   } catch (err) {
     if (err instanceof TestCentreNotFoundError) {
