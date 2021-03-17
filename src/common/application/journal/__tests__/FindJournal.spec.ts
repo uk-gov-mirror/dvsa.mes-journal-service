@@ -1,5 +1,5 @@
 import * as DynamoJournalRepository from '../../../framework/aws/DynamoJournalRepository';
-import { findJournal } from '../FindJournal';
+import { findJournal, findJournalWithResponse } from '../FindJournal';
 import * as journalDecompressor from '../../service/journal-decompressor';
 import { Mock, It, Times } from 'typemoq';
 import { ExaminerWorkSchedule } from '@dvsa/mes-journal-schema';
@@ -72,6 +72,37 @@ describe('FindJournal', () => {
 
         expect(result).toBeNull();
       });
+    });
+  });
+
+  describe('findJournalWithResponse', () => {
+    it('should return the journal embedded in the wrapper', async () => {
+      const compressedJournalFromRepo = { journal: Buffer.from('abc') };
+      spyOn(DynamoJournalRepository, 'getJournal')
+        .and.returnValue(compressedJournalFromRepo);
+
+      const result = await findJournalWithResponse('00000000');
+
+      moqDecompressJournal.verify(x => x(It.isValue(Buffer.from('abc'))), Times.once());
+      // @ts-ignore
+      expect(result.staffNumber).toBe('00000000');
+    });
+
+    it('should return Journal not found error object', async () => {
+      spyOn(DynamoJournalRepository, 'getJournal').and.returnValue(Promise.resolve(null));
+      const result = await findJournalWithResponse('00000000');
+      expect(result).toEqual({ error: 'Journal not found' });
+    });
+
+    it('should return Journal decompression error object', async () => {
+      const compressedJournalFromRepo = { journal: 'abc' };
+      spyOn(DynamoJournalRepository, 'getJournal')
+        .and.returnValue(compressedJournalFromRepo);
+      moqDecompressJournal.reset();
+      moqDecompressJournal.setup(x => x(It.isAny())).throws(new Error('invalid'));
+
+      const result = await findJournalWithResponse('00000000');
+      expect(result).toEqual({ error: 'Journal decompression error' });
     });
   });
 });

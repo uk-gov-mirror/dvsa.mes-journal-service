@@ -4,6 +4,7 @@ import { HttpStatus } from '../../../common/application/api/HttpStatus';
 import * as logger from '../../../common/application/utils/logger';
 import { findJournal } from '../../../common/application/journal/FindJournal';
 import { JournalNotFoundError } from '../../../common/domain/errors/journal-not-found-error';
+import { getEmployeeIdFromRequestContext } from '../../../common/application/journal/employee-id-from-authorizer';
 
 export async function handler(event: APIGatewayProxyEvent, fnCtx: Context) {
   const staffNumber = getStaffNumber(event.pathParameters);
@@ -57,13 +58,6 @@ const getIfModifiedSinceHeaderAsTimestamp = (headers: { [headerName: string]: st
       const parsedIfModifiedSinceHeader = Date.parse(ifModfiedSinceHeaderValue);
       return Number.isNaN(parsedIfModifiedSinceHeader) ? null : parsedIfModifiedSinceHeader;
     }
-  }
-  return null;
-};
-
-const getEmployeeIdFromRequestContext = (requestContext: APIGatewayEventRequestContext): string | null => {
-  if (requestContext.authorizer && typeof requestContext.authorizer.staffNumber === 'string') {
-    return requestContext.authorizer.staffNumber;
   }
   return null;
 };
