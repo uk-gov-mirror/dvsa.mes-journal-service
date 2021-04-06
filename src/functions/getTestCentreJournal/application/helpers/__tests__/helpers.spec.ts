@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import { constructResponseArray } from '../helpers';
 import {
   mockExaminerWorkSchedulesOrEmpty,
@@ -12,6 +13,9 @@ describe('constructResponseArray', () => {
       mockTestCentreDetailFromDynamo,
       mockExaminerWorkSchedulesOrEmpty,
     );
+    const date = new Date();
+    const today: string = moment(date).format('YYYY-MM-DD');
+    const tomorrow: string = moment(date).add(1, 'day').format('YYYY-MM-DD');
     expect(response).toEqual({
       staffNumber: '123456',
       examiners: [
@@ -31,15 +35,15 @@ describe('constructResponseArray', () => {
             },
             testSlots: [
               {
-                slotDetail: { start: '2021-03-12T12:00:00' },
+                slotDetail: { start: `${today}T12:00:00` },
                 testCentre: { centreId: 1234, centreName: 'Swansea' },
               },
               {
-                slotDetail: { start: '2021-03-12T13:00:00' },
+                slotDetail: { start: `${today}T13:00:00` },
                 testCentre: { centreId: 1234, centreName: 'Swansea' },
               },
               {
-                slotDetail: { start: '2021-03-13T12:00:00' },
+                slotDetail: { start: `${tomorrow}T12:00:00` },
                 testCentre: { centreId: 1289, centreName: 'Neath' },
               },
             ],
