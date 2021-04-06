@@ -68,6 +68,6 @@ export const mockExaminerWorkSchedule = (date: string) => {
 
 export const mockExaminerWorkSchedulesOrEmpty = [
   { error: 'Journal not found' },
-  { ...mockExaminerWorkSchedule('2021-03-12') },
+  { ...mockExaminerWorkSchedule(new Date().toISOString().split('T')[0]) },
   { error: 'Journal decompression error' },
 ] as ExaminerWorkScheduleOrEmpty[];
