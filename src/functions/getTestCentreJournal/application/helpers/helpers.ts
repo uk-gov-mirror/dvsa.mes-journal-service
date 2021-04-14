@@ -1,5 +1,6 @@
 import { get, uniqBy } from 'lodash';
 import * as moment from 'moment';
+import { TestCategory } from '@dvsa/mes-test-schema/category-definitions/common/test-category';
 import { AdvanceTestSlot, Deployment, ExaminerWorkSchedule, NonTestActivity, TestSlot } from '@dvsa/mes-journal-schema';
 import {
   Examiner,
@@ -70,6 +71,7 @@ const filterByTestCentreAndDate = <T>(testCentreDetail: TestCentreDetail, info: 
       section.testCentre &&
       isAnyOf(section.testCentre.centreId, testCentreDetail.testCentreIDs) &&
       inNext2Days(section) &&
+      nonADI2Slots(section) &&
       testCentres.push({ name: section.testCentre.centreName, id: section.testCentre.centreId } as TestCentre)
     );
   });
@@ -82,6 +84,14 @@ const inNext2Days = <T>(section: T): boolean => {
   const tomorrow: boolean = moment(slotDate).isSame(moment().add(1, 'day'), 'day');
 
   return today || tomorrow;
+};
+
+export const nonADI2Slots = (section: TestSlot): boolean => {
+  const booking = get(section, 'booking');
+  if (!booking) return true;
+
+  const category = get(booking, 'application.testCategory') as TestCategory;
+  return category !== TestCategory.ADI2;
 };
 
 const deriveError = (journals: ExaminerWorkScheduleOrEmpty[], index: number): string | undefined => {

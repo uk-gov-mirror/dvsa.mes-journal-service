@@ -4,6 +4,7 @@ import {
 import { TestCentreDetail } from '../../../../../common/domain/TestCentreDetailRecord';
 import { ExaminerWorkScheduleOrEmpty } from '../../../framework/handler';
 import * as moment from 'moment';
+import { TestCategory } from '@dvsa/mes-test-schema/category-definitions/common/test-category';
 
 export const mockTestCentreDetailFromDynamo = {
   staffNumber: '123456',
@@ -37,14 +38,22 @@ export const mockExaminerWorkSchedule = (date: string) => {
       {
         slotDetail: { start: `${todayFormatted}T12:00:00` },
         testCentre: { centreId: 1234, centreName: 'Swansea' },
+        booking: { application: { testCategory: TestCategory.BE } },
       },
       {
         slotDetail: { start: `${todayFormatted}T13:00:00` },
         testCentre: { centreId: 1234, centreName: 'Swansea' },
+        booking: { application: { testCategory: TestCategory.B } },
+      },
+      {
+        slotDetail: { start: `${todayFormatted}T14:00:00` },
+        testCentre: { centreId: 1234, centreName: 'Swansea' },
+        booking: { application: { testCategory: TestCategory.ADI2 } },
       },
       {
         slotDetail: { start: `${dayAfterTomorrowFormatted}T12:00:00` },
         testCentre: { centreId: 1234, centreName: 'Swansea' },
+        booking: { application: { testCategory: TestCategory.C } },
       },
       {
         slotDetail: { start: `${tomorrowFormatted}T12:00:00` },
@@ -57,6 +66,7 @@ export const mockExaminerWorkSchedule = (date: string) => {
       {
         slotDetail: { start: `${tomorrowFormatted}T12:00:00` },
         testCentre: { centreId: 1289, centreName: 'Neath' },
+        booking: { application: { testCategory: TestCategory.C } },
       },
     ],
     personalCommitments: [],
