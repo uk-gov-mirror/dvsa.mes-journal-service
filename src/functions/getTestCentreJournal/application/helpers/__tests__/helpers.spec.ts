@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import { constructResponseArray, nonADI2Slots } from '../helpers';
+import { constructResponseArray, isNonADI2TestSlot } from '../helpers';
 import {
   mockExaminerWorkSchedulesOrEmpty,
   mockTestCentreDetailFromDynamo,
@@ -74,20 +74,20 @@ describe('constructResponseArray', () => {
   });
 });
 
-describe('nonADI2Slots', () => {
+describe('isNonADI2TestSlot', () => {
   it('should return true when no booking', () => {
-    expect(nonADI2Slots(undefined as any)).toEqual(true);
-    expect(nonADI2Slots(null as any)).toEqual(true);
-    expect(nonADI2Slots({})).toEqual(true);
-    expect(nonADI2Slots({ examinerVisiting: false })).toEqual(true);
+    expect(isNonADI2TestSlot(undefined as any)).toEqual(true);
+    expect(isNonADI2TestSlot(null as any)).toEqual(true);
+    expect(isNonADI2TestSlot({})).toEqual(true);
+    expect(isNonADI2TestSlot({ examinerVisiting: false })).toEqual(true);
   });
   it('should return true when booking but is not an ADI slot', () => {
-    expect(nonADI2Slots({
+    expect(isNonADI2TestSlot({
       booking: { application: { testCategory: TestCategory.BE } },
     } as TestSlot)).toEqual(true);
   });
   it('should return false when an ADI slot', () => {
-    expect(nonADI2Slots({
+    expect(isNonADI2TestSlot({
       booking: { application: { testCategory: TestCategory.ADI2 } },
     } as TestSlot)).toEqual(false);
   });

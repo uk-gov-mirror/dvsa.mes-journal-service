@@ -71,7 +71,7 @@ const filterByTestCentreAndDate = <T>(testCentreDetail: TestCentreDetail, info: 
       section.testCentre &&
       isAnyOf(section.testCentre.centreId, testCentreDetail.testCentreIDs) &&
       inNext2Days(section) &&
-      nonADI2Slots(section) &&
+      isNonADI2TestSlot(section) &&
       testCentres.push({ name: section.testCentre.centreName, id: section.testCentre.centreId } as TestCentre)
     );
   });
@@ -86,7 +86,7 @@ const inNext2Days = <T>(section: T): boolean => {
   return today || tomorrow;
 };
 
-export const nonADI2Slots = (section: TestSlot): boolean => {
+export const isNonADI2TestSlot = (section: TestSlot): boolean => {
   const booking = get(section, 'booking');
   if (!booking) return true;
 
