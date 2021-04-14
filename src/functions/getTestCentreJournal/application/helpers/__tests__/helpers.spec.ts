@@ -1,10 +1,12 @@
 import * as moment from 'moment';
-import { constructResponseArray } from '../helpers';
+import { constructResponseArray, isNonADI2TestSlot } from '../helpers';
 import {
   mockExaminerWorkSchedulesOrEmpty,
   mockTestCentreDetailFromDynamo,
 } from '../__mocks__/helpers.mock';
 import { TestCentreDetailResponse } from '../../../../../common/domain/TestCentreDetailRecord';
+import { TestCategory } from '@dvsa/mes-test-schema/category-definitions/common/test-category';
+import { TestSlot } from '@dvsa/mes-journal-schema';
 
 describe('constructResponseArray', () => {
   // tslint:disable-next-line:max-line-length
@@ -37,14 +39,17 @@ describe('constructResponseArray', () => {
               {
                 slotDetail: { start: `${today}T12:00:00` },
                 testCentre: { centreId: 1234, centreName: 'Swansea' },
+                booking: { application: { testCategory: TestCategory.BE } },
               },
               {
                 slotDetail: { start: `${today}T13:00:00` },
                 testCentre: { centreId: 1234, centreName: 'Swansea' },
+                booking: { application: { testCategory: TestCategory.B } },
               },
               {
                 slotDetail: { start: `${tomorrow}T12:00:00` },
                 testCentre: { centreId: 1289, centreName: 'Neath' },
+                booking: { application: { testCategory: TestCategory.C } },
               },
             ],
             personalCommitments: [],
@@ -66,5 +71,24 @@ describe('constructResponseArray', () => {
         { name: 'Neath', id: 1289 },
       ],
     } as TestCentreDetailResponse);
+  });
+});
+
+describe('isNonADI2TestSlot', () => {
+  it('should return true when no booking', () => {
+    expect(isNonADI2TestSlot(undefined as any)).toEqual(true);
+    expect(isNonADI2TestSlot(null as any)).toEqual(true);
+    expect(isNonADI2TestSlot({})).toEqual(true);
+    expect(isNonADI2TestSlot({ examinerVisiting: false })).toEqual(true);
+  });
+  it('should return true when booking but is not an ADI slot', () => {
+    expect(isNonADI2TestSlot({
+      booking: { application: { testCategory: TestCategory.BE } },
+    } as TestSlot)).toEqual(true);
+  });
+  it('should return false when an ADI slot', () => {
+    expect(isNonADI2TestSlot({
+      booking: { application: { testCategory: TestCategory.ADI2 } },
+    } as TestSlot)).toEqual(false);
   });
 });
